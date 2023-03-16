@@ -13,8 +13,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-
-#### DATA CLEANING
+#### Data Cleaning
 
 1. Remove the salary range column
 2. split location column into- country, state, city from location
