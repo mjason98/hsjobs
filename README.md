@@ -1,6 +1,6 @@
 # Harbour Space Fake Job Post Detector 
 
-This project is part of an assignment given to students at Harbour Space University. It is intended to detect described a paper, and some metadata, whether it is fake or not.
+This project is part of an assignment given to students at Harbour Space University. It is intended to detect from job post descriptions, and some metadata, whether it is fake or not.
 
 ## Usage
 
