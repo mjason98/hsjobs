@@ -26,7 +26,7 @@ def save_data(data: pd.Series):
     train_false_ids = sample(data_false.index.tolist(), int(len(data_false) * percent))
 
     data_train = pd.concat(
-        [data_true.loc[train_true_ids], data_false.loc[train_false_ids]], axis=1
+        [data_true.loc[train_true_ids], data_false.loc[train_false_ids]], axis=0
     )
     data_train.to_csv(file_path_train, index=False)
 
@@ -35,7 +35,7 @@ def save_data(data: pd.Series):
     data_true = data_true.drop(train_true_ids)
     data_false = data_false.drop(train_false_ids)
 
-    data_test = pd.concat([data_true, data_false], axis=1)
+    data_test = pd.concat([data_true, data_false], axis=0)
     data_test.to_csv(file_path_test, index=False)
 
     del data_test
@@ -52,10 +52,10 @@ def clean_data(df: pd.DataFrame):
     df = df.replace(" ", np.nan)
 
     string_columns = df.select_dtypes(include="object").columns.tolist()
-    df[string_columns] = df[string_columns].fillna("This field is not specified")
+    unspecified = "This field is not specified"
+    df[string_columns] = df[string_columns].fillna(unspecified)
 
     def fix_string_col(text: str):
-        text = text.strip()
         text = text.encode("ascii", "ignore").decode()  # ignore non ascii characters
 
         text = re.sub(
@@ -68,11 +68,15 @@ def clean_data(df: pd.DataFrame):
             r"[^\w\s]", "", text
         )  # remove punctuation. Replace with '' so don't separate contractions
         text = re.sub(" +", " ", text)  # remove double and triple spaces
+        text = text.strip()
 
         return text
 
     for c in string_columns:
         df[c] = df[c].apply(fix_string_col)
+
+    # there are some columns that have numbers
+    df[string_columns] = df[string_columns].replace(r'^\d+$', unspecified, regex=True)
 
     return df
 
