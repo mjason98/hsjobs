@@ -157,21 +157,9 @@ def trainModel():
                         total_acc_2 += (y3 == y_mec.argmax(dim=-1).flatten()).sum().item()
                         total_acc_3 += (y4.flatten() == ( torch.sigmoid(y_tar) > 0.5 ).flatten()).sum().item() / y_tar.shape[-1]
                 dl += y1.shape[0]
-            bar.next(total_loss/dl)
-        if use_acc:
-            res = board.update('train', total_acc/dl, getBest=True)
-            if mtl:
-                res2 = board.update('train_mse', total_mse/dl, getBest=True)
-                res3 = board.update('train_acc2', total_acc_2/dl, getBest=True)
-                res4 = board.update('train_acc3', total_acc_3/dl, getBest=True)
-                if bett == 'reg1':
-                    res = res2
-                elif bett == 'class2':
-                    res = res3
-                elif bett == 'class3':
-                    res = res4
-        else:
-            res = board.update('train', total_loss/dl, getBest=True)
+            # bar.next(total_loss/dl)
+        
+        # res = board.update('train', total_loss/dl, getBest=True)
         
         # Evaluate the model
         if evalData_loader is not None:
