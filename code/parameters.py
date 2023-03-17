@@ -7,9 +7,13 @@ PARAMS = {
 
     # train parameters
     "lr": 0.001,
+    'optim':'adam',
+    'workers':2,
+    'batch':12,
+    'epochs':12,
     
     # model values
-    'TRANS_NAME':'',
+    'TRANS_NAME':'bert-base-uncased',
     
     # dataset values
     "DATA_FOLDER":"data",
