@@ -2,12 +2,25 @@ import argparse, os
 from code.utils import colorify
 
 PARAMS = {
-    "lr": 0.001,
-    "DATA_FOLDER":"data",
+    # general parameters
     'seed':1234567,
+
+    # train parameters
+    "lr": 0.001,
+    
+    # model values
     'TRANS_NAME':'',
-    'PROCESED_DATA_PATH':'data/tmp.csv',
+    
+    # dataset values
+    "DATA_FOLDER":"data",
     'DATA_PATH':'data/fake_job_postings.csv',
+    'DATA_TARGET_COLUMN_NAME':'fraudulent',
+    'data_train':'data/train.csv',
+    'data_test':'data/test.csv',
+    'data_percent':0.05,
+    
+
+    # ...
 }
 
 def check_params(arg=None):
