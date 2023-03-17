@@ -4,6 +4,8 @@ import re
 import pandas as pd
 import numpy as np
 from random import sample
+from torchtext.data import get_tokenizer
+from torchtext.vocab import GloVe
 
 from code.parameters import PARAMS
 
@@ -49,11 +51,6 @@ def clean_data(df: pd.DataFrame):
     )
 
     df = df.drop(["salary_range", "location"], axis=1)
-    df = df.replace(" ", np.nan)
-
-    string_columns = df.select_dtypes(include="object").columns.tolist()
-    unspecified = "This field is not specified"
-    df[string_columns] = df[string_columns].fillna(unspecified)
 
     def fix_string_col(text: str):
         text = text.encode("ascii", "ignore").decode()  # ignore non ascii characters
@@ -72,11 +69,17 @@ def clean_data(df: pd.DataFrame):
 
         return text
 
+    string_columns = df.select_dtypes(include="object").columns
+    df[string_columns] = df[string_columns].fillna("")
+
     for c in string_columns:
         df[c] = df[c].apply(fix_string_col)
 
+    unspecified = "This field is not specified"
+    df[string_columns] = df[string_columns].replace("", unspecified)
+
     # there are some columns that have numbers
-    df[string_columns] = df[string_columns].replace(r'^\d+$', unspecified, regex=True)
+    df[string_columns] = df[string_columns].replace(r"^\d+$", unspecified, regex=True)
 
     return df
 
