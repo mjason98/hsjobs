@@ -2,10 +2,12 @@
 
 import pandas as pd
 from random import sample
+import re
 
 from code.parameters import PARAMS
 
-def load_data(data_path:str):
+
+def load_data(data_path: str):
     data = pd.read_csv(data_path)
     return data
 
@@ -36,13 +38,47 @@ def save_data(data:pd.Series):
 
     return file_path_train, file_path_test
 
+
+def clean_data(df: pd.DataFrame):
+    df[["country", "city_code", "city_name"]] = df["location"].str.split(
+        ",", n=2, expand=True
+    )
+
+    df = df.drop(["salary_range", "location"], axis=1)
+
+    string_columns = df.select_dtypes(include="object").columns.tolist()
+    df = df[string_columns].fillna("This field is not specified")
+
+    def fix_string_col(text: str):
+        text = text.strip()
+        text = text.encode("ascii", "ignore").decode()  # ignore non ascii characters
+
+        text = re.sub(
+            "([A-Z])((?=[a-z]))", r" \1", text
+        )  # if lower case followed by upper case, separate by space
+
+        text = re.sub("http[^\s]+ ", " ", text)
+        text = re.sub("url[^\s]+ ", " ", text)
+        text = re.sub(
+            r"[^\w\s]", "", text
+        )  # remove punctuation. Replace with '' so don't separate contractions
+        text = re.sub(" +", " ", text)  # remove double and triple spaces
+
+        return text
+
+    for c in string_columns:
+        df[c] = df[c].apply(fix_string_col)
+
+    return df
+
+
 # ----------------------------------------------------------------
 
-DATA_PIPELINE = [load_data, save_data]
+DATA_PIPELINE = [load_data, clean_data, save_data]
+
 
 def processData():
-    curr_value = PARAMS['DATA_PATH']
+    curr_value = PARAMS["DATA_PATH"]
 
     for f in DATA_PIPELINE:
         curr_value = f(curr_value)
-    
