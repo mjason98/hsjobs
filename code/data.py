@@ -1,11 +1,9 @@
 # data preprocesing funtions here
 
-import re
-import pandas as pd
-import numpy as np
 from random import sample
-from torchtext.data import get_tokenizer
-from torchtext.vocab import GloVe
+import re
+
+import pandas as pd
 
 from code.parameters import PARAMS
 
