@@ -14,6 +14,7 @@ PARAMS = {
     
     # model values
     'TRANS_NAME':'bert-base-uncased',
+    'MODEL_FOLDER':'pts',
     
     # dataset values
     "DATA_FOLDER":"data",
@@ -50,5 +51,9 @@ def check_params(arg=None):
     if not os.path.isdir(PARAMS['DATA_FOLDER']):
         os.mkdir(PARAMS['DATA_FOLDER'])
         print ('# Created folder', colorify(PARAMS['DATA_FOLDER']), 'please copy the data files there')
+    
+    if not os.path.isdir(PARAMS['MODEL_FOLDER']):
+        os.mkdir(PARAMS['MODEL_FOLDER'])
+        print ('# Created folder', colorify(PARAMS['MODEL_FOLDER']), 'to save the models weights')
 
     return 1
