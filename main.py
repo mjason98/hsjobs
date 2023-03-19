@@ -1,7 +1,9 @@
 import sys
 from code.parameters import check_params
 from code.data import processData
-from code.models import setSeed
+from code.models import setSeed, trainModel
+
+from code.models import predict
 
 if __name__ == '__main__':
 
@@ -14,3 +16,13 @@ if __name__ == '__main__':
     
     # DATA PIPELINE
     processData()
+
+    # Model train 
+    trainModel()
+
+    # todo: temporal function here
+
+
+
+    # run the telegram bot
+    # todo
