@@ -4,6 +4,7 @@ from code.data import processData
 from code.models import setSeed, trainModel
 
 from code.models import predict
+from subprocess import call
 
 if __name__ == '__main__':
 
@@ -22,7 +23,6 @@ if __name__ == '__main__':
 
     # todo: temporal function here
 
-
-
     # run the telegram bot
-    # todo
+    call(["python", "code/chatbot.py"])
+    
