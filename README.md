@@ -14,7 +14,11 @@ pip install -r requirements.txt
 ```
 
 ### Run the project
-Run the main file, it will prepare the data and train the model:
+To run the project, make sure you have a `.env` file in the root folder.
+
+It should look exactly like `.env.example` but with your real TELEGRAM TOKEN.
+
+Once you do it, you can run the main file, it will prepare the data and train the model:
 ```shell
 python main.py
 ```
