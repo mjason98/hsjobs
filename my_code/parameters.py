@@ -10,7 +10,7 @@ PARAMS = {
     'optim':'adam',
     'workers':2,
     'batch':12,
-    'epochs':12,
+    'epochs':2,
     
     # model values
     'TRANS_NAME':'bert-base-uncased',

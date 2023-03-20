@@ -7,7 +7,7 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 import random
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 from transformers import AutoTokenizer, AutoModel
 
 from sklearn.metrics import precision_recall_fscore_support as prf
@@ -110,13 +110,12 @@ class mydataset(Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        
-        # ids = int(self.reg.sub("", "0" + str(self.data_frame.loc[idx, self.id_name])))
+
         ids = int(self.data_frame.loc[idx, self.id_name])
         
         # text fields
-        sent1 = 'Title: ' + self.data_frame.loc[idx, self.x1]
-        sent2 = 'Description:' + self.data_frame.loc[idx, self.x2]
+        sent1 = 'title: ' + self.data_frame.loc[idx, self.x1]
+        sent2 = 'description:' + self.data_frame.loc[idx, self.x2]
 
         sent = ' '.join([sent1, sent2])
 
@@ -126,9 +125,30 @@ class mydataset(Dataset):
         sample = {'x': sent, 'y': target, 'id':ids}
         return sample
 
-def makeDataSet(csv_path:str, batch, shuffle=True):
+def getWeights(csv_path:str):
+    data = pd.read_csv(csv_path)
+    target_name = PARAMS["DATA_TARGET_COLUMN_NAME"]
+
+    positive = len(data.query(target_name + "==1"))
+    negative = len(data.query(target_name + "==0"))
+
+    wc = [negative, positive]
+
+    weights = [ 1/wc[ int( data.loc[i, target_name] ) ] for i in range(len(data)) ]
+
+    return weights
+
+
+def makeDataSet(csv_path:str, batch, shuffle=True, balanse=False):
     data   =  mydataset(csv_path)
-    loader =  DataLoader(data, batch_size=batch, shuffle=shuffle, num_workers=PARAMS['workers'], drop_last=False)
+
+    sampler = None
+    if balanse:
+        sample_weight = getWeights(csv_path)
+        sampler = WeightedRandomSampler(weights=sample_weight, num_samples=len(data), replacement=True)
+        shuffle = None
+
+    loader =  DataLoader(data, batch_size=batch, shuffle=shuffle, num_workers=PARAMS['workers'], drop_last=False, sampler=sampler)
     return data, loader
 
 def trainModel():
@@ -137,7 +157,7 @@ def trainModel():
     model = Encoder_Model(500)
     optim = model.makeOptimizer(lr=PARAMS['lr'], algorithm=PARAMS['optim'])
 
-    _, data_train_l = makeDataSet(PARAMS['data_train'], PARAMS['batch'])
+    _, data_train_l = makeDataSet(PARAMS['data_train'], PARAMS['batch'], balanse=True)
     _, data_test_l = makeDataSet(PARAMS['data_test'], PARAMS['batch'])
 
     dataloaders = {'train': data_train_l, 'val':data_test_l}
@@ -186,7 +206,9 @@ def predict(values:dict, model=None):
 
         values: {
             "title": "the title",
-            "description": "the description"
+            "description": "the description",
+            "department": "",
+            ""
         }
     '''
     if model is None:
@@ -196,7 +218,7 @@ def predict(values:dict, model=None):
     
     model.eval()
 
-    text = ' '.join(['Title: ' + values['title'], 'Description: ' + values['description']])
+    text = ' '.join(['title: ' + values['title'], 'description: ' + values['description']])
 
     with torch.no_grad():
         y_hat = model([text])
