@@ -158,7 +158,7 @@ def trainModel():
     optim = model.makeOptimizer(lr=PARAMS['lr'], algorithm=PARAMS['optim'])
 
     _, data_train_l = makeDataSet(PARAMS['data_train'], PARAMS['batch'], balanse=True)
-    _, data_test_l = makeDataSet(PARAMS['data_test'], PARAMS['batch'])
+    _, data_test_l = makeDataSet(PARAMS['data_test'], PARAMS['batch'], shuffle=False)
 
     dataloaders = {'train': data_train_l, 'val':data_test_l}
 
@@ -167,8 +167,6 @@ def trainModel():
     model.save(model_path)
 
     for e in range(epochs):
-        
-
         for phase in ['train', 'val']:
             if phase == 'train':
                 model.train()
