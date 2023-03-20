@@ -1,9 +1,7 @@
 import sys
-from code.parameters import check_params
-from code.data import processData
-from code.models import setSeed, trainModel
-
-from code.models import predict
+from my_code.parameters import check_params
+from my_code.data import processData
+from my_code.models import setSeed, trainModel
 from subprocess import call
 
 if __name__ == '__main__':
@@ -24,5 +22,5 @@ if __name__ == '__main__':
     # todo: temporal function here
 
     # run the telegram bot
-    call(["python", "code/chatbot.py"])
+    call(["python", "my_code/chatbot.py"])
     
