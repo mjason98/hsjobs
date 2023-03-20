@@ -54,7 +54,13 @@ class Encoder_Model(nn.Module):
 
         self.encoder_last_layer = nn.Linear(vec_size, 2)
 
-        self.device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
+        if torch.cuda.is_available():
+            self.device = torch.device("cuda:0")
+        elif torch.backends.mps.is_available() and torch.backends.mps.is_built():
+            self.device = torch.device("mps")
+        else:
+            self.device = torch.device("cpu")
+            
         self.to(device=self.device)
         
     def forward(self, X, ret_vec=False):
