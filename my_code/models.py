@@ -10,6 +10,8 @@ import random
 from torch.utils.data import Dataset, DataLoader
 from transformers import AutoTokenizer, AutoModel
 
+from sklearn.metrics import precision_recall_fscore_support as prf
+
 from my_code.parameters import PARAMS
 
 def setSeed():
@@ -179,16 +181,7 @@ def trainModel():
         print('# {} epoch {} Loss {:.3} Acc {:.3}{}'.format(phase, e, total_loss/dl, total_acc/dl, '*' if total_acc == best_acc else ' '))
 
 def predictSingleText(text:str, model=None):
-    if model is None:
-        model_path = os.path.join(PARAMS['MODEL_FOLDER'], 'model.pt')
-        model = Encoder_Model(500)
-        model.load(model_path)
-    
-    model.eval()
-    with torch.no_grad():
-        y_hat = model([text])
-        pred = y_hat.argmax(dim=-1).flatten().cpu().numpy().tolist()
-        return pred
+    return 0
 
 def predict(values:dict, model=None):
     '''
@@ -212,3 +205,49 @@ def predict(values:dict, model=None):
         y_hat = model([text])
         pred = y_hat.argmax(dim=-1).flatten().cpu().numpy().tolist()
         return pred
+
+def predictTest(model=None):
+    print ('# Making predictions over test dataset')
+
+    _, data_loader = makeDataSet(PARAMS['data_test'], PARAMS['batch'], shuffle=False)
+    
+    if model is None:
+        model_path = os.path.join(PARAMS['MODEL_FOLDER'], 'model.pt')
+        model = Encoder_Model(500)
+        model.load(model_path)
+
+    preds = []
+
+    total_loss, total_acc, dl, best_acc = 0., 0., 0, 0.
+    
+    iter = tqdm(data_loader)
+    for data in iter:
+        with torch.no_grad():
+            y_hat = model(data['x'])
+            y1    = data['y'].to(device=model.device).flatten()
+
+            loss = model.criterion1(y_hat, y1)
+
+            total_loss += loss.item() * y1.shape[0]
+            total_acc += (y1 == y_hat.argmax(dim=-1).flatten()).sum().item()
+            dl += y1.shape[0]
+
+            preds.append(y_hat.argmax(dim=-1).cpu().numpy())
+    
+    preds = np.concatenate(preds, axis=0)
+    
+    print ('# Total loss {:.3} ACC {:.3}'.format(total_loss/dl, total_acc/dl))
+
+    return preds
+
+def makeMergeDataset():
+    y_hat = predictTest()
+    y = pd.read_csv(PARAMS['data_test'])[PARAMS["DATA_TARGET_COLUMN_NAME"]]
+
+    metrics = prf(y, y_hat)
+
+    print ("# precision\t",   metrics[0])
+    print ("# recall\t",      metrics[1])
+    print ("# fbeta_score\t", metrics[2])
+    print ("# support\t",     metrics[3])
+    
