@@ -2,12 +2,30 @@ import argparse, os
 from code.utils import colorify
 
 PARAMS = {
-    "lr": 0.001,
-    "DATA_FOLDER":"data",
+    # general parameters
     'seed':1234567,
-    'TRANS_NAME':'',
-    'PROCESED_DATA_PATH':'data/tmp.csv',
+
+    # train parameters
+    "lr": 0.001,
+    'optim':'adam',
+    'workers':2,
+    'batch':12,
+    'epochs':12,
+    
+    # model values
+    'TRANS_NAME':'bert-base-uncased',
+    'MODEL_FOLDER':'pts',
+    
+    # dataset values
+    "DATA_FOLDER":"data",
     'DATA_PATH':'data/fake_job_postings.csv',
+    'DATA_TARGET_COLUMN_NAME':'fraudulent',
+    'data_train':'data/train.csv',
+    'data_test':'data/test.csv',
+    'data_percent':0.05,
+    
+
+    # ...
 }
 
 def check_params(arg=None):
@@ -33,5 +51,9 @@ def check_params(arg=None):
     if not os.path.isdir(PARAMS['DATA_FOLDER']):
         os.mkdir(PARAMS['DATA_FOLDER'])
         print ('# Created folder', colorify(PARAMS['DATA_FOLDER']), 'please copy the data files there')
+    
+    if not os.path.isdir(PARAMS['MODEL_FOLDER']):
+        os.mkdir(PARAMS['MODEL_FOLDER'])
+        print ('# Created folder', colorify(PARAMS['MODEL_FOLDER']), 'to save the models weights')
 
     return 1

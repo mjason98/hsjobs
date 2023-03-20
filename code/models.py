@@ -1,11 +1,13 @@
 # models here
 
+import os
+from tqdm import tqdm
 import pandas as pd, numpy as np
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
 import random
-# from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader
 from transformers import AutoTokenizer, AutoModel
 
 from code.parameters import PARAMS
@@ -85,3 +87,103 @@ class Encoder_Model(nn.Module):
             return torch.optim.Adam(pars, lr=lr, weight_decay=decay)
         elif algorithm == 'rms':
             return torch.optim.RMSprop(pars, lr=lr, weight_decay=decay)
+
+class mydataset(Dataset):
+    def __init__(self, csv_file):
+        self.data_frame = pd.read_csv(csv_file)
+        self.x1  = 'title'
+        self.x2  = 'description'
+        self.id_name = 'job_id'
+        self.y_name = 'fraudulent'
+
+    def __len__(self):
+        return len(self.data_frame)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+        
+        # ids = int(self.reg.sub("", "0" + str(self.data_frame.loc[idx, self.id_name])))
+        ids = int(self.data_frame.loc[idx, self.id_name])
+        
+        # text fields
+        sent1 = 'Title: ' + self.data_frame.loc[idx, self.x1]
+        sent2 = 'Description:' + self.data_frame.loc[idx, self.x2]
+
+        sent = ' '.join([sent1, sent2])
+
+        # target field
+        target = int(self.data_frame.loc[idx, self.y_name])
+
+        sample = {'x': sent, 'y': target, 'id':ids}
+        return sample
+
+def makeDataSet(csv_path:str, batch, shuffle=True):
+    data   =  mydataset(csv_path)
+    loader =  DataLoader(data, batch_size=batch, shuffle=shuffle, num_workers=PARAMS['workers'], drop_last=False)
+    return data, loader
+
+def trainModel():
+    model_path = os.path.join(PARAMS['MODEL_FOLDER'], 'model.pt')
+
+    model = Encoder_Model(500)
+    optim = model.makeOptimizer(lr=PARAMS['lr'], algorithm=PARAMS['optim'])
+
+    _, data_train_l = makeDataSet(PARAMS['data_train'], PARAMS['batch'])
+    _, data_test_l = makeDataSet(PARAMS['data_test'], PARAMS['batch'])
+
+    dataloaders = {'train': data_train_l, 'val':data_test_l}
+
+    epochs = PARAMS['epochs']
+
+    model.save(model_path)
+
+    for e in range(epochs):
+        total_loss, total_acc, dl, best_acc = 0., 0., 0, 0.
+
+        for phase in ['train', 'val']:
+            if phase == 'train':
+                model.train()
+            else:
+                model.eval()
+            
+            iter = tqdm(dataloaders[phase])
+            
+            for data in iter:
+                optim.zero_grad()
+
+                with torch.set_grad_enabled(phase == 'train'):
+                    y_hat = model(data['x'])
+                    y1    = data['y'].to(device=model.device).flatten()
+
+                    loss = model.criterion1(y_hat, y1)
+                    
+                    if phase == 'train':
+                        loss.backward()
+                        optim.step()
+
+                    total_loss += loss.item() * y1.shape[0]
+                    total_acc += (y1 == y_hat.argmax(dim=-1).flatten()).sum().item()
+                    dl += y1.shape[0]
+            
+            if best_acc < total_acc and phase == 'val':
+                best_acc = total_acc
+                model.save(model_path)
+
+        print('# {} epoch {} Loss {:.3} Acc {:.3}{}'.format(phase, e, total_loss/dl, total_acc/dl, '*' if total_acc == best_acc else ' '))
+
+def predict(text:str, model=None):
+    if model is None:
+        model_path = os.path.join(PARAMS['MODEL_FOLDER'], 'model.pt')
+        model = Encoder_Model(500)
+        model.load(model_path)
+    
+    model.eval()
+    with torch.no_grad():
+        y_hat = model([text])
+        pred = y_hat.argmax(dim=-1).flatten()
+
+        print (pred)
+        print (type(pred))
+
+        return pred
