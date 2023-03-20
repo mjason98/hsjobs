@@ -172,7 +172,7 @@ def trainModel():
 
         print('# {} epoch {} Loss {:.3} Acc {:.3}{}'.format(phase, e, total_loss/dl, total_acc/dl, '*' if total_acc == best_acc else ' '))
 
-def predict(text:str, model=None):
+def predictSingleText(text:str, model=None):
     if model is None:
         model_path = os.path.join(PARAMS['MODEL_FOLDER'], 'model.pt')
         model = Encoder_Model(500)
@@ -181,9 +181,28 @@ def predict(text:str, model=None):
     model.eval()
     with torch.no_grad():
         y_hat = model([text])
-        pred = y_hat.argmax(dim=-1).flatten()
+        pred = y_hat.argmax(dim=-1).flatten().cpu().numpy().tolist()
+        return pred
 
-        print (pred)
-        print (type(pred))
+def predict(values:dict, model=None):
+    '''
+        Use the folowwing values:
 
+        values: {
+            "title": "the title",
+            "description": "the description"
+        }
+    '''
+    if model is None:
+        model_path = os.path.join(PARAMS['MODEL_FOLDER'], 'model.pt')
+        model = Encoder_Model(500)
+        model.load(model_path)
+    
+    model.eval()
+
+    text = ' '.join(['Title: ' + values['title'], 'Description: ' + values['description']])
+
+    with torch.no_grad():
+        y_hat = model([text])
+        pred = y_hat.argmax(dim=-1).flatten().cpu().numpy().tolist()
         return pred
