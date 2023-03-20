@@ -17,7 +17,7 @@ def save_data(data: pd.Series):
     file_path_train = PARAMS["data_train"]
     file_path_test = PARAMS["data_test"]
     target_name = PARAMS["DATA_TARGET_COLUMN_NAME"]
-    percent = 1. - PARAMS["data_percent"]
+    percent = 1.0 - PARAMS["data_percent"]
 
     data_true = data.query(target_name + "==1")
     data_false = data.query(target_name + "==0")
@@ -82,9 +82,38 @@ def clean_data(df: pd.DataFrame):
     return df
 
 
+def vectorization(df: pd.DataFrame):
+    unspecified = "This field is not specified"
+
+    def binary(x):
+        return int(x != unspecified)
+
+    to_binary = ["country", "city_name", "city_code"]
+
+    for feat in to_binary:
+        df["valid_" + feat] = df[feat].apply(binary)
+
+    df = df.drop(to_binary, axis=1)
+
+    categoricals = [
+        "employment_type",
+        "required_experience",
+        "required_education",
+        "industry",
+        "function",
+    ]
+
+    cat_vector = pd.get_dummies(df[categoricals]).values
+    df["cat_vector"] = cat_vector.tolist()
+    df["cat_vector"] = df["cat_vector"].apply(lambda x: " ".join(map(str, x)))
+    df = df.drop(categoricals, axis=1)
+
+    return df
+
+
 # ----------------------------------------------------------------
 
-DATA_PIPELINE = [load_data, clean_data, save_data]
+DATA_PIPELINE = [load_data, clean_data, vectorization, save_data]
 
 
 def processData():
