@@ -1,6 +1,6 @@
 import telebot, os
 from decouple import config
-from my_code.models import predict
+from my_code.models import predictSingleText
 
 TELEGRAM_TOKEN = config('TELEGRAM_TOKEN')
 
@@ -16,7 +16,7 @@ def send_welcome(message):
 @bot.message_handler(func= lambda message: message.content_type == "text")
 def handle_job_post(message):
     
-    prediction = predict(message.text)
+    prediction = predictSingleText(message.text)
     if prediction == 1:
         response = "This job posting is probably a fraudulent post."
     else:
