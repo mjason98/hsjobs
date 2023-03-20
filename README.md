@@ -13,6 +13,17 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### Run the project
+Run the main file, it will prepare the data and train the model:
+```shell
+python main.py
+```
+
+After it is done, run the chatbot by using:
+```shell
+python -m my_code.chatbot
+```
+
 #### Data Cleaning
 
 1. Remove the salary range column
