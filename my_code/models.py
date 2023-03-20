@@ -180,9 +180,6 @@ def trainModel():
 
         print('# {} epoch {} Loss {:.3} Acc {:.3}{}'.format(phase, e, total_loss/dl, total_acc/dl, '*' if total_acc == best_acc else ' '))
 
-def predictSingleText(text:str, model=None):
-    return 0
-
 def predict(values:dict, model=None):
     '''
         Use the folowwing values:
@@ -218,7 +215,7 @@ def predictTest(model=None):
 
     preds = []
 
-    total_loss, total_acc, dl, best_acc = 0., 0., 0, 0.
+    total_loss, total_acc, dl = 0., 0., 0
     
     iter = tqdm(data_loader)
     for data in iter:
@@ -240,7 +237,7 @@ def predictTest(model=None):
 
     return preds
 
-def makeMergeDataset():
+def showModelMetrics():
     y_hat = predictTest()
     y = pd.read_csv(PARAMS['data_test'])[PARAMS["DATA_TARGET_COLUMN_NAME"]]
 

@@ -1,7 +1,7 @@
 import sys
 from my_code.parameters import check_params
 from my_code.data import processData
-from my_code.models import setSeed, trainModel, makeMergeDataset
+from my_code.models import setSeed, trainModel, showModelMetrics
 
 if __name__ == '__main__':
 
@@ -16,5 +16,5 @@ if __name__ == '__main__':
     processData()
 
     # Model train 
-    # trainModel()
-    makeMergeDataset()
+    trainModel()
+    showModelMetrics()
