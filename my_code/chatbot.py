@@ -26,8 +26,8 @@ def send_welcome(message):
     text = """
     Hi. This bot will accept the description of a Job Post and it will predict if it's a fraudulent or not.\n\
 To use it, type:
-    - /set_title to insert the title
-    - /set_description to insert the description
+    - /set_title TITLE to insert the title
+    - /set_description DESCRIPTION to insert the description
     
     - /get_title to get the title of the current job post
     - /get_description to get the description of the current job post
@@ -47,12 +47,36 @@ def handle_set_title(message):
     title = message.text
     title = title.replace('/set_title ', '')
     add_field(message.chat.id, 'title', title)
+    response = """
+    Title set correctly!\n\
+You can still use:
+    - /set_title TITLE to insert the title
+    - /set_description DESCRIPTION to insert the description
+    
+    - /get_title to get the title of the current job post
+    - /get_description to get the description of the current job post
+    
+    - /predict to predict whether it's fraudulent or not 
+    """
+    bot.reply_to(message, response)
 
 @bot.message_handler(commands=['set_description'])
 def handle_set_description(message):
     description = message.text
     description = description.replace('/set_description ', '')
     add_field(message.chat.id, 'description', description)
+    response = """
+    Description set correctly!\n\
+You can still use:
+    - /set_title TITLE to insert the title
+    - /set_description DESCRIPTION to insert the description
+    
+    - /get_title to get the title of the current job post
+    - /get_description to get the description of the current job post
+    
+    - /predict to predict whether it's fraudulent or not 
+    """
+    bot.reply_to(message, response)
 
 @bot.message_handler(commands=['predict'])
 def handle_prediction(message):
