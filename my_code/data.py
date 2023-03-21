@@ -84,7 +84,7 @@ def clean_data(df: pd.DataFrame):
 
 
 def vectorization(df: pd.DataFrame):
-    print ('# Data vecorization phase')
+    print("# Data vecorization phase")
     unspecified = "This field is not specified"
 
     def binary(x):
@@ -128,8 +128,9 @@ def vect_from_dict(input: dict):
     v = [0] * len(pos_from_cat)
     for cat, value in input.items():
         key = f"{cat}_{value}"
-        assert key in pos_from_cat
-        v[pos_from_cat[key]] = 1
+
+        if key in pos_from_cat:
+            v[pos_from_cat[key]] = 1
 
     return " ".join(map(str, v))
 
