@@ -15,9 +15,12 @@ if __name__ == '__main__':
     setSeed()
     
     # DATA PIPELINE
-    processData()
+    # processData()
 
     # Model train 
     trainModel()
     # showModelMetrics()
+
+    # p = predict({'description':"My dummy description."})
+    # print (p)
 
