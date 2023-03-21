@@ -1,8 +1,7 @@
 # data preprocesing funtions here
 
-from operator import pos
-from random import sample
 import pickle
+from random import sample
 import re
 
 import pandas as pd
