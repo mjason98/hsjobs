@@ -1,6 +1,6 @@
 import telebot, os
 from decouple import config
-from my_code.models import predict
+from my_code.modelsSimple import predict
 
 TELEGRAM_TOKEN = config('TELEGRAM_TOKEN')
 
