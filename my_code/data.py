@@ -1,5 +1,6 @@
 # data preprocesing funtions here
 
+import pickle
 from random import sample
 import re
 
@@ -83,7 +84,7 @@ def clean_data(df: pd.DataFrame):
 
 
 def vectorization(df: pd.DataFrame):
-    print ('# Data vecorization phase')
+    print("# Data vecorization phase")
     unspecified = "This field is not specified"
 
     def binary(x):
@@ -104,12 +105,34 @@ def vectorization(df: pd.DataFrame):
         "function",
     ]
 
-    cat_vector = pd.get_dummies(df[categoricals]).values
-    df["cat_vector"] = cat_vector.tolist()
+    cat_vector = pd.get_dummies(df[categoricals])
+
+    pos_from_cat = {}
+    for i, x in enumerate(cat_vector.columns):
+        pos_from_cat[x] = i
+
+    with open(PARAMS["cat_vector"], "wb") as fd:
+        pickle.dump(pos_from_cat, fd)
+
+    df["cat_vector"] = cat_vector.values.tolist()
     df["cat_vector"] = df["cat_vector"].apply(lambda x: " ".join(map(str, x)))
     df = df.drop(categoricals, axis=1)
 
     return df
+
+
+def vect_from_dict(input: dict):
+    with open(PARAMS["cat_vector"], "rb") as fd:
+        pos_from_cat = pickle.load(fd)
+
+    v = [0] * len(pos_from_cat)
+    for cat, value in input.items():
+        key = f"{cat}_{value}"
+
+        if key in pos_from_cat:
+            v[pos_from_cat[key]] = 1
+
+    return " ".join(map(str, v))
 
 
 # ----------------------------------------------------------------
