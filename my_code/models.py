@@ -158,7 +158,7 @@ def trainModel():
     optim = model.makeOptimizer(lr=PARAMS['lr'], algorithm=PARAMS['optim'])
 
     _, data_train_l = makeDataSet(PARAMS['data_train'], PARAMS['batch'], balanse=True)
-    _, data_test_l = makeDataSet(PARAMS['data_test'], PARAMS['batch'])
+    _, data_test_l = makeDataSet(PARAMS['data_test'], PARAMS['batch'], shuffle=False)
 
     dataloaders = {'train': data_train_l, 'val':data_test_l}
 
@@ -167,8 +167,6 @@ def trainModel():
     model.save(model_path)
 
     for e in range(epochs):
-        total_loss, total_acc, dl, best_acc = 0., 0., 0, 0.
-
         for phase in ['train', 'val']:
             if phase == 'train':
                 model.train()
@@ -176,6 +174,8 @@ def trainModel():
                 model.eval()
             
             iter = tqdm(dataloaders[phase])
+
+            total_loss, total_acc, dl, best_acc = 0., 0., 0, 0.
             
             for data in iter:
                 optim.zero_grad()
@@ -198,7 +198,7 @@ def trainModel():
                 best_acc = total_acc
                 model.save(model_path)
 
-        print('# {} epoch {} Loss {:.3} Acc {:.3}{}'.format(phase, e, total_loss/dl, total_acc/dl, '*' if total_acc == best_acc else ' '))
+            print('# {} epoch {} Loss {:.3} Acc {:.3}{}'.format(phase, e, total_loss/dl, total_acc/dl, '*' if total_acc == best_acc else ' '))
 
 def predict(values:dict, model=None):
     '''

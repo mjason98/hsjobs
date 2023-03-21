@@ -1,7 +1,9 @@
 import sys
 from my_code.parameters import check_params
 from my_code.data import processData
-from my_code.models import setSeed, trainModel, showModelMetrics
+# from my_code.models import setSeed, trainModel, showModelMetrics
+
+from my_code.modelsSimple import trainModel, setSeed, predict
 
 if __name__ == '__main__':
 
@@ -17,4 +19,5 @@ if __name__ == '__main__':
 
     # Model train 
     trainModel()
-    showModelMetrics()
+    # showModelMetrics()
+
