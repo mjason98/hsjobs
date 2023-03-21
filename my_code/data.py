@@ -83,6 +83,7 @@ def clean_data(df: pd.DataFrame):
 
 
 def vectorization(df: pd.DataFrame):
+    print ('# Data vecorization phase')
     unspecified = "This field is not specified"
 
     def binary(x):
